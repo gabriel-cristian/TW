@@ -31,4 +31,6 @@ router.post("/postList", (req, res) => {
   res.json(el);
 });
 
+// TO DO - creati un endpoint PUT pentru a edita un element din lista dupa ID
+
 app.listen(8000, () => console.log("Server is running on port 8000"));
