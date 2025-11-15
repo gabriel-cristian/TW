@@ -1,0 +1,52 @@
+* {
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  font-family: "Courier New", Courier, monospace;
+  padding: 32px;
+  color: #fff;
+  text-align: center;
+}
+
+.header {
+  background-color: blue;
+  height: 15%;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+  height: 70%;
+}
+
+.container > .sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 15%;
+  background-color: rgb(40, 40, 143);
+}
+
+.container > .main {
+  display: flex;
+  flex-direction: column;
+  width: 85%;
+  background-color: yellow;
+  color: blue;
+  text-align: center;
+}
+
+.sidebar-item {
+  background-color: aqua;
+  color: black;
+  padding: 10px;
+  border-bottom: 1px solid grey;
+}
+
+.footer {
+  background-color: blue;
+  height: 15%;
+}
