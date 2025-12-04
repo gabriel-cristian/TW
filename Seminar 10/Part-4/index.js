@@ -9,10 +9,14 @@ const sequelize = require("./sequelize");
 // Import created models
 const University = require("./models/university");
 const Student = require("./models/student");
-//const { noExtendRight } = require("sequelize/dist/lib/operators");
+const Course = require("./models/course");
+const { noExtendRight } = require("sequelize/dist/lib/operators");
 
 // Define entities relationship
 University.hasMany(Student);
+University.hasMany(Course);
+Student.belongsToMany(Course, {through: "enrollements"});
+Course.belongsToMany(Student, {through: "enrollements"});
 
 // Express middleware
 application.use(
@@ -279,6 +283,164 @@ application.delete('/universities/:universityId/courses/:courseId', async (reque
       const course = courses.shift();
       if (course) {
         await course.destroy();
+        response.sendStatus(204);
+      } else {
+        response.sendStatus(404);
+      }
+    } else {
+      response.sendStatus(404);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET student enrollements to courses.
+ */
+application.get('/universities/:universityId/students/:studentId/enrollements', async (request, response, next) => {
+  try {
+    const university = await University.findByPk(request.params.universityId);
+    if (university) {
+      const students = await university.getStudents({id: request.params.studentId});
+      const student = students.shift();
+      if (student) {
+        const courses = await student.getCourses({attributes: ['id']});
+        if (courses.length > 0) {
+          response.json(courses);
+        } else {
+          response.sendStatus(204);
+        }
+      } else {
+        response.sendStatus(404);
+      }
+    } else {
+      response.sendStatus(404);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST to enroll a student to a course.
+ */
+application.post('/universities/:universityId/students/:studentId/enrollements/:courseId', async (request, response, next) => {
+  try {
+    const university = await University.findByPk(request.params.universityId);
+    if (university) {
+      const students = await university.getStudents({id: request.params.studentId});
+      const student = students.shift();
+      const courses = await university.getCourses({id: request.params.courseId});
+      const course = courses.shift();
+      if (student && course) {
+        student.addCourse(course);
+        student.save();
+        response.sendStatus(204);
+      } else {
+        response.sendStatus(404);
+      }
+    } else {
+      response.sendStatus(404);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * DELETE student enrollement to a course.
+ */
+ application.delete('/universities/:universityId/students/:studentId/enrollements/:courseId', async (request, response, next) => {
+  try {
+    const university = await University.findByPk(request.params.universityId);
+    if (university) {
+      const students = await university.getStudents({id: request.params.studentId});
+      const student = students.shift();
+      const courses = await university.getCourses({id: request.params.courseId});
+      const course = courses.shift();
+      if (student && course) {
+        student.removeFromCourse(course);
+        student.save();
+        response.sendStatus(204);
+      } else {
+        response.sendStatus(404);
+      }
+    } else {
+      response.sendStatus(404);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET the list of enrolled students to a course.
+ */
+application.get('/universities/:universityId/courses/:courseId/enrollements', async (request, response, next) => {
+  try {
+    const university = await University.findByPk(request.params.universityId);
+    if (university) {
+      const courses = await university.getCourses({id: request.params.courseId});
+      const course = courses.shift();
+      if (course) {
+        const students = await course.getStudents({attributes: ['id']});
+        if (students.length > 0) {
+          response.json(students);
+        } else {
+          response.sendStatus(204);
+        }
+      } else {
+        response.sendStatus(404);
+      }
+    } else {
+      response.sendStatus(404);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST to enroll a student to a course.
+ */
+application.post('/universities/:universityId/courses/:courseId/enrollements/:studentId', async (request, response, next) => {
+  try {
+    const university = await University.findByPk(request.params.universityId);
+    if (university) {
+      const courses = await university.getCourses({id: request.params.courseId});
+      const course = courses.shift();
+      const students = await university.getStudents({id: request.params.studentId});
+      const student = students.shift();
+      if (course && student) {
+        course.addStudent(student);
+        course.save();
+        response.sendStatus(204);
+      } else {
+        response.sendStatus(400);
+      }
+    } else {
+      response.sendStatus(404);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * DELETE student enrollement to a course.
+ */
+ application.delete('/universities/:universityId/courses/:courseId/enrollements/:studentId', async (request, response, next) => {
+  try {
+    const university = await University.findByPk(request.params.universityId);
+    if (university) {
+      const courses = await university.getCourses({id: request.params.courseId});
+      const course = courses.shift();
+      const students = await university.getStudents({id: request.params.studentId});
+      const student = students.shift();
+      if (student && course) {
+        course.removeStudent(student);
+        course.save();
         response.sendStatus(204);
       } else {
         response.sendStatus(404);
